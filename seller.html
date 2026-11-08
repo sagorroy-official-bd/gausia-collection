@@ -1,54 +1,101 @@
 <!DOCTYPE html>
-<html lang="bn" translate="no" class="notranslate"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="google" content="notranslate"><title>GAUSIA - Seller Panel</title>
+<html lang="bn" translate="no" class="notranslate"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="google" content="notranslate"><meta http-equiv="Content-Language" content="bn">
+<title>GAWSIA - Premium Seller Panel</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<style>.notranslate{translate:no}body{background:#FFF8F0;margin:0;font-family:Hind Siliguri,Arial}.top-head{background:linear-gradient(90deg,#111827,#4C1D95,#B91C1C);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;color:#fff}.inp{width:100%;border:2px solid #FACC15;border-radius:10px;padding:10px;font-size:15px;margin-top:8px}.card{border:1px solid #E5E7EB;border-radius:14px;padding:14px;background:#fff}.btn{background:#9d174d;color:#fff;border:0;padding:12px;border-radius:10px;width:100%;font-weight:bold;cursor:pointer}</style></head>
-<body>
-<div class="top-head"><b>🌸 GAUSIA - Seller Panel</b><a href="index.html" style="background:#fff;color:#111;padding:6px 12px;border-radius:20px;text-decoration:none;font-size:13px">🏠 কাস্টমার পেজ</a></div>
-<div style="max-width:600px;margin:auto;padding:14px">
-<div class="card"><h3 style="margin:0">🧑‍💼 সেলার - নতুন পণ্য দিন</h3><p style="font-size:13px;color:#666">তথ্য দিলেই এডমিনে চলে যাবে। অরিজিনাল হিসেবে সেভ হবে।</p>
-<input id="sName" class="inp" placeholder="শাড়ির নাম - যেমন: জামদানি শাড়ি">
-<input id="sPrice" class="inp" type="number" placeholder="খুচরা দাম - যেমন: 800">
-<input id="sWhole" class="inp" type="number" placeholder="পাইকারি দাম - যেমন: 500">
-<input id="sImg" class="inp" placeholder="ছবির লিংক (না থাকলে খালি রাখুন)">
-<textarea id="sDesc" class="inp" placeholder="বিবরণ - কাপড়, কালার, সাইজ"></textarea>
-<button class="btn" onclick="addSeller()" style="margin-top:12px">✅ Admin-এ পাঠান - সেভ হবে</button>
-<p id="sMsg" style="color:green;font-weight:bold"></p></div>
-<div class="card" style="margin-top:14px"><b>📦 আমার পাঠানো পণ্য (অরিজিনাল):</b><div id="sellerList" style="margin-top:10px"></div></div>
+<style>
+.notranslate{translate:no}
+body{background:#FFF8F0;margin:0}
+.top-head{background:linear-gradient(90deg,#111827,#4C1D95,#9D174D,#BE185D);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;color:#fff;position:sticky;top:0;z-index:50}
+.logo-g{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#F97316,#EF4444);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#fff;border:2px solid #fff}
+.nav-mini{font-size:12px;font-weight:800;padding:6px 10px;border-radius:9999px;color:#fff;cursor:pointer;white-space:nowrap}
+.nav-mini.active{background:#FACC15;color:#111}
+.lang-btn{background:#fff;color:#111;font-weight:900;font-size:12px;padding:6px 10px;border-radius:9999px;cursor:pointer;border:2px solid #FACC15;white-space:nowrap}
+.inp{width:100%;border:2px solid #FDE68A;border-radius:12px;padding:11px;background:#FFFBEB;margin-top:4px;outline:none;color:#111}
+.card{border-radius:18px;padding:16px;background:#fff;box-shadow:0 6px 18px rgba(0,0,0,.08);color:#111}
+.thumb{width:56px;height:56px;object-fit:cover;border-radius:8px;border:2px solid #FFD580}
+.orig-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.08);border:2px solid #FDE68A}
+.orig-img{width:100%;height:150px;object-fit:contain;background:#fff}
+.orig-title{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;height:32px;font-size:12px;font-weight:700;line-height:1.3}
+.img-del{position:absolute;top:-7px;right:-7px;background:#EF4444;color:#fff;width:22px;height:22px;border-radius:50%;text-align:center;cursor:pointer;font-size:13px;font-weight:900;line-height:22px;border:2px solid #fff;z-index:5}
+#loginGate{position:fixed;inset:0;z-index:999;background:linear-gradient(135deg,#111827,#1E40AF,#0E7490);display:flex;align-items:center;justify-content:center;padding:16px}
+.login-box{background:#fff;border-radius:20px;padding:24px;width:100%;max-width:360px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.4)}
+</style></head>
+<body translate="no" class="notranslate">
+<div id="changePassBox" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.7);align-items:center;justify-content:center;padding:16px"><div style="background:#fff;border-radius:20px;padding:20px;width:100%;max-width:360px"><h2 style="font-weight:900;font-size:18px;text-align:center">🔑 সেলার পাসওয়ার্ড বদলান</h2><p style="font-size:12px;color:#666;text-align:center;margin-top:4px">শুধু সেলারই বদলাতে পারবে।<br>নতুনটা মনে রাখবেন, কাউকে দিবেন না।</p><label style="font-size:12px;font-weight:800;display:block;margin-top:12px">🔒 পুরান পাসওয়ার্ড</label><input id="oldPass" type="password" class="inp" placeholder="পুরান পাসওয়ার্ড"><label style="font-size:12px;font-weight:800;display:block;margin-top:10px">🆕 নতুন পাসওয়ার্ড</label><input id="newPass" type="password" class="inp" placeholder="কমপক্ষে ৬ অক্ষর"><label style="font-size:12px;font-weight:800;display:block;margin-top:10px">✅ নতুন পাসওয়ার্ড আবার</label><input id="newPass2" type="password" class="inp" placeholder="আবার একই পাসওয়ার্ড"><p id="changePassMsg" style="font-size:12px;font-weight:800;color:#DC2626;margin-top:8px;text-align:center"></p><button onclick="saveNewPass()" style="width:100%;background:#111;color:#fff;padding:12px;border-radius:12px;font-weight:900;margin-top:10px">✅ পাসওয়ার্ড সেভ করুন</button><button onclick="closeChangePass()" style="width:100%;background:#eee;padding:10px;border-radius:12px;font-weight:800;margin-top:8px">❌ বাতিল</button></div></div>
+<div id="loginGate"><div class="login-box"><div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#2563EB,#0E7490);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:900;color:#fff;margin:0 auto;border:3px solid #FACC15">🏪</div><h2 style="font-weight:900;font-size:20px;margin-top:10px">🏪 GAWSIA - Seller Login</h2><p style="font-size:12px;color:#666;margin-top:4px">পারমিশন ছাড়া কেউ ঢুকতে পারবে না।<br>ফোন নাম্বার দিয়ে ঢুকলে আপনার দোকান + এড্রেস অটো আসবে।</p>
+<label style="font-size:12px;font-weight:800;display:block;text-align:left;margin-top:14px">📱 মোবাইল নাম্বার</label><input id="sellerPhoneInput" type="tel" class="inp" placeholder="যেমন: 01712345678">
+<label style="font-size:12px;font-weight:800;display:block;text-align:left;margin-top:10px">🔑 সেলার পাসওয়ার্ড</label><input id="sellerPassInput" type="password" class="inp" placeholder="পাসওয়ার্ড লিখুন" onkeydown="if(event.key==='Enter'){event.preventDefault();loginSeller();}"><div style="display:flex;gap:8px;margin-top:8px"><button onclick="togglePass()" style="flex:1;background:#eee;padding:10px;border-radius:10px;font-weight:800;font-size:12px" id="showPassBtn">👁️ দেখুন</button><button onclick="loginSeller()" style="flex:2;background:#111;color:#fff;padding:10px;border-radius:10px;font-weight:900">🔓 Login</button></div><p id="loginMsg" style="font-size:12px;font-weight:800;color:#DC2626;margin-top:8px"></p><p style="font-size:11px;color:#888;margin-top:10px">প্রথমবার ডিফল্ট পাসওয়ার্ড: <b style="color:#111">Seller2026</b><br>ঢুকে উপরে 🔑 পাসওয়ার্ড বদলান বাটন থেকে নিজেরটা বসিয়ে নিবেন।</p><button onclick="location.href='index.html'" style="width:100%;background:#F3F4F6;padding:10px;border-radius:10px;font-weight:800;margin-top:10px">🏠 Home এ ফিরে যান</button></div></div>
+<div class="top-head"><div class="flex items-center gap-2"><div class="logo-g">G</div><div><p class="font-black">GAWSIA</p><p class="text-[11px] text-yellow-300 font-bold">✦ গাউছিয়া বাজার • Premium Seller Panel</p></div></div><div class="flex gap-1 items-center"><button onclick="toggleLang()" id="langBtn" class="lang-btn">বাং ⇄ EN</button><span class="nav-mini" onclick="location.href='index.html'">🏠 Home</span><span class="nav-mini active">Seller</span><button onclick="changeSellerPass()" style="background:#FACC15;color:#111;font-weight:900;font-size:11px;padding:6px 10px;border-radius:9999px">🔑 পাসওয়ার্ড বদলান</button><button onclick="logoutSeller()" style="background:#EF4444;color:#fff;font-weight:900;font-size:11px;padding:6px 10px;border-radius:9999px">🚪 Logout</button></div></div>
+<div class="max-w-[920px] mx-auto p-3">
+<div class="grid md:grid-cols-2 gap-4">
+<div class="card">
+<h2 class="font-black">📦 দোকান + পণ্য <span class="text-xs font-normal text-gray-500">- Admin Original এর সাথে ১:১ মিল থাকবে</span></h2>
+<p id="sellerProfileInfo" style="font-size:11px;background:#FEF3C7;padding:8px;border-radius:10px;margin-top:8px;font-weight:700">📱 এই ফোনের দোকান + এড্রেস ফিক্স থাকবে। একবার লিখলেই হবে।</p>
+<label class="text-xs font-bold block mt-3">🏪 দোকান / SHOP-01</label><input id="fShop" class="inp" value="GAWSIA" oninput="saveSellerProfile()">
+<label class="text-xs font-bold block mt-2">📱 মোবাইল</label><input id="fMobile" class="inp" placeholder="যেমন: 01712345678" value="" oninput="saveSellerProfile()">
+<label class="text-xs font-bold block mt-2">📍 দোকানের এড্রেস * (একবার লিখলেই এই ফোনে ফিক্স থাকবে)</label><input id="fAddress" class="inp" placeholder="যেমন: গাউছিয়া মার্কেট, ভুলতা, রূপগঞ্জ" oninput="saveSellerProfile()">
+<label class="text-xs font-bold block mt-2">📝 পণ্যের নাম *</label><input id="fName" class="inp" placeholder="যেমন: Lal Sari">
+<div class="grid grid-cols-3 gap-2"><div><label class="text-xs font-bold block mt-2">💰 পাইকারি মূল্য</label><input id="fWhole" type="number" class="inp" placeholder="700"></div><div><label class="text-xs font-bold block mt-2">🏷️ খুচরা মূল্য *</label><input id="fPrice" type="number" class="inp" placeholder="1000" oninput="calcDisc()"></div><div><label class="text-xs font-bold block mt-2">🏷️ পুরান দাম</label><input id="fOldPrice" type="number" class="inp" placeholder="1899" oninput="calcDisc()"></div></div>
+<div class="grid grid-cols-2 gap-2"><div><label class="text-xs font-bold block mt-2">📂 ক্যাটাগরি *</label><select id="fCat" class="inp"><option value="শাড়ি">শাড়ি</option><option value="মহিলা">মহিলা</option><option value="পুরুষ">পুরুষ</option><option value="মেয়ে">মেয়ে</option><option value="ছেলে">ছেলে</option><option value="সিটি গোল্ড গহনা">সিটি গোল্ড গহনা</option><option value="প্রসাধনী">প্রসাধনী</option><option value="থ্রি পিছ">থ্রি পিছ</option><option value="বোরকা">বোরকা</option><option value="পাঞ্জাবি">পাঞ্জাবি</option><option value="ব্লেজার">ব্লেজার</option></select></div><div><label class="text-xs font-bold block mt-2">⭐ কোয়ালিটি</label><select id="fQuality" class="inp"><option>Premium</option><option>Standard</option><option>Normal</option></select></div></div>
+<div class="grid grid-cols-2 gap-2"><div><label class="text-xs font-bold block mt-2">📦 কোয়ান্টিটি</label><input id="fQty" type="number" class="inp" placeholder="10"></div><div><label class="text-xs font-bold block mt-2">📐 সাইজ</label><input id="fSize" class="inp" placeholder="যেমন: 14 হাত / Free Size"></div></div>
+<div class="grid grid-cols-2 gap-2"><div><label class="text-xs font-bold block mt-2">🎁 ডিসকাউন্ট % <span class="text-gray-400 font-normal">(অটো)</span></label><input id="fDiscount" type="number" class="inp" placeholder="0" readonly style="background:#FEF3C7"></div><div><label class="text-xs font-bold block mt-2">🚚 ডেলিভারি</label><input id="fDelivery" class="inp" value="Standard Delivery - 11-13 Nov"></div></div>
+<label class="text-xs font-bold block mt-2">✅ গ্যারান্টি</label><input id="fGuarantee" class="inp" value="Best Price Guarantee • 14 days easy return">
+<label class="text-xs font-bold block mt-2">🖼️ ছবি - সর্বোচ্চ ৬টা (এডিট করলে যেগুলো থাকবে সবগুলোই যাবে)</label><input type="file" id="fImgs" accept="image/*" multiple class="text-xs mt-1" onchange="previewImgs(this)"><div id="imgPreview" class="flex gap-1 flex-wrap mt-2"></div><p id="imgCount" class="text-xs text-gray-500 mt-1">ছবি: 0 / 6</p>
+<label class="text-xs font-bold block mt-2">💬 মন্তব্য লিখুন</label><input id="fComment" class="inp" placeholder="মন্তব্য লিখুন">
+<label class="text-xs font-bold block mt-2">📝 রিমার্ক</label><textarea id="fRemark" class="inp" rows="2" placeholder="রিমার্ক লিখুন"></textarea>
+<button onclick="addDraft()" class="w-full bg-black text-white py-3 rounded-xl font-black mt-3">➕ Draft এ যোগ করুন</button><p class="text-[11px] text-gray-400 text-center mt-1">Draft এ যোগ করলেই Admin Original এ যাওয়ার জন্য রেডি হবে।</p>
+</div>
+<div class="space-y-4">
+<div class="card"><h2 class="font-black">👁️ প্রিভিউ - Draft</h2><p class="text-xs text-gray-500"><span id="draftCount">0</span> টা পণ্য • মোট ছবি <span id="draftImgCount">0</span> টা</p><p class="text-xs text-gray-400 mt-1">এখানে যেমন দেখবেন, Admin Original এ হুবহু তেমনই দেখাবে।</p><div id="draftList" class="grid grid-cols-2 gap-2 mt-3"></div><p id="noDraft" class="text-center text-gray-400 text-sm py-4">কোনো Draft নাই</p><button onclick="sendAll()" class="w-full bg-green-600 text-white py-3 rounded-xl font-black mt-3">📤 Send Admin - <span id="sendCount">0</span> টা পণ্য</button><p class="text-[11px] text-center text-gray-400 mt-1">Send দিলেই অ্যাডমিনের কাছে চলে যাবে • সব তথ্য একসাথে যাবে</p><div class="bg-purple-50 border border-purple-200 rounded-xl p-3 text-center text-xs font-bold mt-2">✅ পাঠানো হয়ে গেছে, অ্যাডমিন দেখে Approve করবে।<br><span class="text-gray-500 font-normal">আপনার আর কিছু করতে হবে না।</span></div></div>
+<div class="card"><h3 class="font-black">📱 মোবাইল / ল্যাপটপ - দুই জায়গা থেকে চলবে</h3><button onclick="copyLink()" class="bg-black text-white px-4 py-2 rounded-full text-xs font-bold mt-2">🔗 লিংক কপি করুন</button><p id="copyMsg" class="text-xs text-green-600 font-bold mt-1"></p></div>
+<div class="card"><h3 class="font-black">📦 আমার পাঠানো পণ্য - অ্যাডমিনে কি অবস্থা?</h3><div id="mySentList" class="mt-2 space-y-2"></div><p id="noSent" class="text-xs text-gray-400">এখনো কিছু পাঠাননি</p></div>
+</div>
+</div>
 </div>
 <script>
-// === FIREBASE CONFIG - আগের ফাইলের config টা এখানে থাকবে ===
-// আপনার আগের seller.html এ যেই firebaseConfig ছিল, সেটাই এখানে বসবে। 
-// যদি Config না থাকে, তাহলে নিচের লাইনটা আপনার আগের ফাইল থেকে কপি করে বসান।
-const firebaseConfig = {apiKey:"AIzaSyDUMMY",authDomain:"gausia-dummy.firebaseapp.com",projectId:"gausia-dummy"};
-try{ if(!firebase.apps.length) firebase.initializeApp(firebaseConfig); }catch(e){}
-const db = (typeof firebase!=='undefined' && firebase.firestore) ? firebase.firestore() : null;
-async function addSeller(){
- let n=document.getElementById('sName').value.trim();
- let p=document.getElementById('sPrice').value||0;
- let w=document.getElementById('sWhole').value||0;
- let img=document.getElementById('sImg').value||'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600';
- let d=document.getElementById('sDesc').value;
- if(!n){alert('নাম দিন');return;}
- let data={type:'original',name:n,price:+p,whole:+w,img:img,desc:d,status:'pending',createdAt:Date.now()};
- try{
-  if(db){ await db.collection('products').add(data); }
-  else{ let arr=JSON.parse(localStorage.getItem('gausia_v2')||'[]'); arr.push({id:Date.now(),...data}); localStorage.setItem('gausia_v2',JSON.stringify(arr)); }
-  document.getElementById('sMsg').innerText='✅ সেভ হয়ে এডমিনে চলে গেছে!';
-  document.getElementById('sName').value='';document.getElementById('sPrice').value='';document.getElementById('sWhole').value='';document.getElementById('sDesc').value='';
-  loadList();
- }catch(e){ alert('সেভ হয় নাই: '+e.message); }
+const firebaseConfig={apiKey:"AIzaSyAG6CcBRYJVgbczfZHOR27P4teSgnEx9nM",authDomain:"online-shop-e990d.firebaseapp.com",projectId:"online-shop-e990d",storageBucket:"online-shop-e990d.firebasestorage.app",messagingSenderId:"271204762546",appId:"1:271204762546:web:e02a33708667e2a27b9aab"};
+firebase.initializeApp(firebaseConfig); const db=firebase.firestore();
+let drafts=[], curLang=localStorage.getItem('sellerLang')||'bn', tempImgs=[];
+let SELLER_PASS='Seller2026', loginTries=0;
+let currentPhone = localStorage.getItem('gausiaSellerPhone')||'';
+function getPhoneKey(){ let p=(document.getElementById('fMobile').value||currentPhone||'').trim(); return p; }
+function saveSellerProfile(){
+  let phone=getPhoneKey(); if(!phone) return;
+  let profile={shop:document.getElementById('fShop').value.trim(), mobile:phone, address:document.getElementById('fAddress').value.trim()};
+  localStorage.setItem('sellerProfile_'+phone, JSON.stringify(profile));
+  localStorage.setItem('gausiaSellerPhone', phone);
+  db.collection('sellerProfiles').doc(phone).set(profile,{merge:true}).catch(()=>{});
+  let info=document.getElementById('sellerProfileInfo'); if(info) info.innerText='✅ ফিক্স: '+profile.shop+' • '+profile.mobile+' • '+profile.address;
 }
-async function loadList(){
- let list=document.getElementById('sellerList');
- try{
-  let items=[];
-  if(db){ let snap=await db.collection('products').where('type','==','original').get(); snap.forEach(d=>items.push(d.data())); }
-  else{ items=JSON.parse(localStorage.getItem('gausia_v2')||'[]').filter(x=>x.type=='original'); }
-  items.sort((a,b)=>b.createdAt-a.createdAt);
-  list.innerHTML = items.length ? items.map(p=>`<p>• ${p.name} - ${p.price} টাকা - ${p.status}</p>`).join('') : 'এখনো কিছু পাঠান নাই';
- }catch(e){ list.innerHTML='লোড হয় নাই'; }
+function loadSellerProfile(phone){
+  if(!phone) return;
+  try{ let s=localStorage.getItem('sellerProfile_'+phone); if(s){ let p=JSON.parse(s); if(p.shop) document.getElementById('fShop').value=p.shop; if(p.mobile) document.getElementById('fMobile').value=p.mobile; if(p.address) document.getElementById('fAddress').value=p.address; let info=document.getElementById('sellerProfileInfo'); if(info) info.innerText='✅ ফিক্স: '+p.shop+' • '+p.mobile+' • '+p.address; return; } }catch(e){}
+  db.collection('sellerProfiles').doc(phone).get().then(d=>{ if(d.exists){ let p=d.data(); if(p.shop) document.getElementById('fShop').value=p.shop; if(p.mobile) document.getElementById('fMobile').value=p.mobile; if(p.address) document.getElementById('fAddress').value=p.address; } });
 }
-loadList();
+function checkLogin(){ if(sessionStorage.getItem('gausiaSellerLogin')==='yes'){ let g=document.getElementById('loginGate'); if(g) g.style.display='none'; if(currentPhone) loadSellerProfile(currentPhone); } }
+function togglePass(){ let inp=document.getElementById('sellerPassInput'); let btn=document.getElementById('showPassBtn'); if(inp.type=='password'){ inp.type='text'; btn.innerText='🙈 লুকান'; } else { inp.type='password'; btn.innerText='👁️ দেখুন'; } }
+function loginSeller(){ let phone=document.getElementById('sellerPhoneInput').value.trim(); let v=document.getElementById('sellerPassInput').value; let msg=document.getElementById('loginMsg'); if(!phone){ msg.innerText='❌ মোবাইল নাম্বার লিখেন'; return; } if(!v){ msg.innerText='❌ পাসওয়ার্ড লিখেন'; return; } if(v===SELLER_PASS){ currentPhone=phone; localStorage.setItem('gausiaSellerPhone',phone); sessionStorage.setItem('gausiaSellerLogin','yes'); document.getElementById('loginGate').style.display='none'; document.getElementById('sellerPassInput').value=''; msg.innerText=''; document.getElementById('fMobile').value=phone; loadSellerProfile(phone); alert('✅ Welcome Seller! আপনার দোকান + এড্রেস অটো চলে আসছে।'); } else { loginTries++; msg.innerText='❌ ভুল পাসওয়ার্ড! ('+loginTries+' বার)'; if(loginTries>=5){ msg.innerText='❌ ৫ বার ভুল হয়েছে। ১ মিনিট পর আবার চেষ্টা করেন।'; document.getElementById('sellerPassInput').disabled=true; setTimeout(()=>{ document.getElementById('sellerPassInput').disabled=false; loginTries=0; msg.innerText=''; },60000); } } }
+function changeSellerPass(){ document.getElementById('oldPass').value=''; document.getElementById('newPass').value=''; document.getElementById('newPass2').value=''; document.getElementById('changePassMsg').innerText=''; document.getElementById('changePassMsg').style.color='#DC2626'; document.getElementById('changePassBox').style.display='flex'; }
+function closeChangePass(){ document.getElementById('changePassBox').style.display='none'; }
+function saveNewPass(){ let oldP=document.getElementById('oldPass').value; let np=document.getElementById('newPass').value.trim(); let np2=document.getElementById('newPass2').value.trim(); let msg=document.getElementById('changePassMsg'); if(!oldP){ msg.innerText='❌ পুরান পাসওয়ার্ড লিখেন'; return; } if(oldP!==SELLER_PASS){ msg.innerText='❌ পুরান পাসওয়ার্ড ভুল!'; return; } if(np.length<6){ msg.innerText='❌ নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষর হতে হবে'; return; } if(np!==np2){ msg.innerText='❌ ২ বার মিলতেছে না, আবার লিখেন'; return; } if(np===oldP){ msg.innerText='❌ নতুনটা পুরানটার মতো হয়ে গেছে, আলাদা দেন'; return; } db.collection('settings').doc('site').set({sellerPass:np},{merge:true}).then(()=>{ SELLER_PASS=np; msg.style.color='#16A34A'; msg.innerText='✅ পাসওয়ার্ড বদলে গেছে!'; setTimeout(()=>{ closeChangePass(); alert('✅ সেলার পাসওয়ার্ড বদলে গেছে!'); },600); }); }
+function logoutSeller(){ if(!confirm('🚪 Logout করবেন?\n\nআবার ঢুকতে পাসওয়ার্ড লাগবে।')) return; sessionStorage.removeItem('gausiaSellerLogin'); document.getElementById('loginGate').style.display='flex'; document.getElementById('sellerPassInput').value=''; }
+function toggleLang(){ curLang=(curLang=='bn'?'en':'bn'); localStorage.setItem('sellerLang',curLang); document.getElementById('langBtn').innerText=(curLang=='bn'?'বাং ⇄ EN':'EN ⇄ বাং'); }
+function calcDisc(){ let sale=Number(document.getElementById('fPrice').value)||0; let oldP=Number(document.getElementById('fOldPrice').value)||0; document.getElementById('fDiscount').value=oldP?Math.round((1-sale/oldP)*100):0; }
+function compressImage(file){ return new Promise(res=>{ let reader=new FileReader(); reader.onload=e=>{ let img=new Image(); img.onload=()=>{ let canvas=document.createElement('canvas'); let scale=Math.min(1,800/img.width); canvas.width=img.width*scale; canvas.height=img.height*scale; canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height); res(canvas.toDataURL('image/jpeg',0.70)); }; img.src=e.target.result; }; reader.readAsDataURL(file); }); }
+async function previewImgs(input){ let files=[...input.files].slice(0,6); tempImgs=[]; for(let f of files){ tempImgs.push(await compressImage(f)); } renderTempImgs(); }
+function renderTempImgs(){ document.getElementById('imgCount').innerText='ছবি: '+tempImgs.length+' / 6'; document.getElementById('imgPreview').innerHTML=tempImgs.map((u,i)=>`<div style="position:relative"><img src="${u}" class="thumb"><span class="img-del" onclick="tempImgs.splice(${i},1);renderTempImgs()">✕</span></div>`).join(''); }
+function clearForm(){ ['fName','fWhole','fPrice','fOldPrice','fQty','fSize','fDiscount','fComment','fRemark'].forEach(id=>document.getElementById(id).value=''); document.getElementById('fDelivery').value='Standard Delivery - 11-13 Nov'; document.getElementById('fGuarantee').value='Best Price Guarantee • 14 days easy return'; tempImgs=[]; renderTempImgs(); document.getElementById('fImgs').value=''; }
+function addDraft(){ let name=document.getElementById('fName').value.trim(); let price=Number(document.getElementById('fPrice').value)||0; if(!name) return alert('❌ পণ্যের নাম লিখেন'); if(!price) return alert('❌ খুচরা মূল্য লিখেন'); if(!tempImgs.length) return alert('❌ অন্তত ১টা ছবি দেন'); saveSellerProfile(); let oldP=Number(document.getElementById('fOldPrice').value)||price; drafts.push({shop:document.getElementById('fShop').value.trim()||'GAWSIA', mobile:getPhoneKey()||'11111', address:document.getElementById('fAddress').value.trim(), name:name, whole:Number(document.getElementById('fWhole').value)||0, price:price, oldPrice:oldP, cat:document.getElementById('fCat').value, quality:document.getElementById('fQuality').value, qty:Number(document.getElementById('fQty').value)||0, size:document.getElementById('fSize').value.trim()||'One size', discount:Number(document.getElementById('fDiscount').value)||0, delivery:document.getElementById('fDelivery').value.trim(), guarantee:document.getElementById('fGuarantee').value.trim(), comment:document.getElementById('fComment').value.trim(), remark:document.getElementById('fRemark').value.trim(), imgs:[...tempImgs], img:tempImgs[0]}); renderDrafts(); clearForm(); alert('✅ Draft এ যোগ হয়েছে। এখন Send Admin চাপেন।'); }
+function delDraft(i){ if(!confirm('Draft থেকে ডিলিট করবেন?')) return; drafts.splice(i,1); renderDrafts(); }
+function toggleDraftDetail(i){ let box=document.getElementById('draftDetail-'+i); if(!box) return; box.style.display=(box.style.display=='none'||!box.style.display)?'block':'none'; }
+function renderDrafts(){ document.getElementById('draftCount').innerText=drafts.length; document.getElementById('sendCount').innerText=drafts.length; document.getElementById('draftImgCount').innerText=drafts.reduce((a,d)=>a+d.imgs.length,0); document.getElementById('noDraft').style.display=drafts.length?'none':'block'; document.getElementById('draftList').innerHTML=drafts.map((p,i)=>`<div class="orig-card"><div onclick="toggleDraftDetail(${i})"><img src="${p.imgs[0]}" class="orig-img"></div><div style="padding:8px"><p class="orig-title">${p.name}</p><p class="mt-1"><span style="color:#F85606;font-weight:900;font-size:13px">৳${p.price}</span> <span style="color:#888;font-size:11px;text-decoration:line-through">৳${p.oldPrice}</span> <span style="color:#888;font-size:10px">Qty: ${p.qty}</span></p><div class="grid grid-cols-2 gap-1 mt-2"><button onclick="toggleDraftDetail(${i})" class="bg-yellow-400 py-2 rounded-lg font-black text-[11px]">👁️ দেখুন</button><button onclick="delDraft(${i})" class="bg-red-100 text-red-600 py-2 rounded-lg font-bold text-[11px]">🗑️ Delete</button></div><div id="draftDetail-${i}" style="display:none" class="mt-2 bg-yellow-50 border rounded-xl p-2 text-[12px] leading-relaxed"><div class="flex gap-1 flex-wrap">${p.imgs.map(u=>`<img src="${u}" class="thumb" style="width:40px;height:40px">`).join('')}</div><p class="mt-1">🏪 দোকান: ${p.shop}</p><p>📱 মোবাইল: ${p.mobile}</p><p>📍 এড্রেস: ${p.address||'-'}</p><p>💰 পাইকারি: ৳${p.whole} | 🏷️ খুচরা: ৳${p.price}</p><p>🏷️ পুরান দাম: ৳${p.oldPrice} | 📂 ক্যাটাগরি: ${p.cat}</p><p>⭐ কোয়ালিটি: ${p.quality} | 📦 Qty: ${p.qty}</p><p>📐 সাইজ: ${p.size} | 🎁 ডিসকাউন্ট: ${p.discount}%</p><p>🚚 ডেলিভারি: ${p.delivery}</p><p>✅ গ্যারান্টি: ${p.guarantee}</p><p>💬 মন্তব্য: ${p.comment||'-'}</p><p>📝 রিমার্ক: ${p.remark||'-'}</p></div></div></div>`).join(''); }
+async function sendAll(){ if(!drafts.length) return alert('❌ আগে Draft এ যোগ করেন'); if(!confirm('📤 '+drafts.length+' টা পণ্য Admin এ পাঠাবেন?')) return; for(let p of drafts){ await db.collection('sellerDrafts').add({...p, status:'pending', createdAt:new Date().toISOString()}); } alert('✅ '+drafts.length+' টা পণ্য Admin Original এ চলে গেছে।'); drafts=[]; renderDrafts(); }
+function copyLink(){ let url=location.href; if(navigator.clipboard) navigator.clipboard.writeText(url); document.getElementById('copyMsg').innerText='✅ লিংক কপি হয়েছে'; }
+db.collection('settings').doc('site').onSnapshot(d=>{ if(d.exists&&d.data().sellerPass) SELLER_PASS=d.data().sellerPass; });
+db.collection('settings').doc('categories').onSnapshot(d=>{ if(d.exists&&d.data().list){ let sel=document.getElementById('fCat'); let cur=sel.value; sel.innerHTML=d.data().list.filter(c=>c!=='All').map(c=>`<option value="${c}" ${c==cur?'selected':''}>${c}</option>`).join('')||'<option value="শাড়ি">শাড়ি</option>'; } });
+db.collection('sellerDrafts').orderBy('createdAt','desc').onSnapshot(s=>{ let docs=s.docs.slice(0,10).map(d=>({id:d.id,...d.data()})); document.getElementById('noSent').style.display=docs.length?'none':'block'; document.getElementById('mySentList').innerHTML=docs.map(d=>`<div class="border rounded-xl p-2 text-xs bg-yellow-50"><b>${d.name}</b> - ৳${d.price} • ${d.cat} • ${d.imgs?d.imgs.length:0} টা ছবি<br><span class="font-bold ${d.status=='pending'?'text-yellow-600':'text-green-600'}">${d.status=='pending'?'⏳ Admin দেখে নাই / Pending':'✅ Admin দেখেছে'}</span></div>`).join(''); });
+checkLogin(); renderDrafts(); renderTempImgs();
 </script></body></html>
